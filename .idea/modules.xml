@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/zipdiff.iml" filepath="$PROJECT_DIR$/.idea/modules/zipdiff.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/zipdiff_main.iml" filepath="$PROJECT_DIR$/.idea/modules/zipdiff_main.iml" group="zipdiff" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/zipdiff_test.iml" filepath="$PROJECT_DIR$/.idea/modules/zipdiff_test.iml" group="zipdiff" />
+    </modules>
+  </component>
+</project>
