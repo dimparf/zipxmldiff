@@ -3,8 +3,9 @@ package ru.nyxale.zipdiff;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
@@ -25,29 +26,29 @@ import org.xmlunit.xpath.JAXPXPathEngine;
 public class XmlUnitDiffer implements Differ {
 
     @Override
-    public List<String> processDiffFiles(List<FileFromZip> modifiedFiles, List<FileFromZip> oldFiles) {
+    public Optional<List<String>> processDiffFiles(List<FileFromZip> modifiedFiles, List<FileFromZip> oldFiles) {
         XmlReader xmlReader = new XmlReader();
         List<String> diff = new ArrayList<>();
         List<FileFromZip> oldFilesExistInModList = oldFiles
             .parallelStream()
             .filter(oldFile -> modifiedFiles
-                .parallelStream()
+                .stream()
                 .anyMatch(modifiedFile -> modifiedFile.fileName.equalsIgnoreCase(oldFile.fileName))).collect(Collectors.toList());
 
-        oldFilesExistInModList.parallelStream().map(oldFile -> {
+        return oldFilesExistInModList.parallelStream().map(oldFile -> {
             try {
                 String oldFileContent = xmlReader.readXmlFile(oldFile);
+                //this is safe .get(0)
                 FileFromZip newFile = modifiedFiles
                     .stream()
                     .filter(modifiedFile -> modifiedFile.fileName.equalsIgnoreCase(oldFile.fileName)).collect(Collectors.toList()).get(0);
                 String newFileContent = xmlReader.readXmlFile(newFile);
-                //System.out.println(String.format("Process files: %s and %s", oldFile.fileName, newFile.fileName));
+                System.out.println(String.format("Process files: %s and %s", oldFile.fileName, newFile.fileName));
                 return processDiff(oldFileContent, newFileContent);
             } catch (IOException ioe) {
                 return diff;
             }
-        }).collect(Collectors.toList());
-        return diff;
+        }).findFirst();//.collect(Collectors.toList());
     }
 
     /**
@@ -61,8 +62,7 @@ public class XmlUnitDiffer implements Differ {
             .checkForSimilar()
             .withNodeMatcher(new DefaultNodeMatcher(ElementSelectors.byNameAndAllAttributes))
             .build();
-        Iterable<Difference> differences = myDiff.getDifferences();
-        for (Difference difference : differences) {
+        for (Difference difference : myDiff.getDifferences()) {
             if (difference.getComparison().getControlDetails().getTarget() != null) {
                 Node testNode = difference.getComparison().getControlDetails().getTarget();
                 String selector = difference.getComparison().getControlDetails().getXPath();

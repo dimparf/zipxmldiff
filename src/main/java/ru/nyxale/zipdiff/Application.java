@@ -1,6 +1,7 @@
 package ru.nyxale.zipdiff;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.List;
 import java.util.zip.ZipFile;
 
@@ -47,7 +48,7 @@ public class Application {
             diff.modifiedFilesCont = newFiles.size();
             System.out.println("Modified files: " + newFiles);
             XmlUnitDiffer xmlUnitDiffer = new XmlUnitDiffer();
-            System.out.println(xmlUnitDiffer.processDiffFiles(newFiles, oldFiles));
+            System.out.println(xmlUnitDiffer.processDiffFiles(newFiles, oldFiles).orElse(Collections.emptyList()));
         } catch (IOException ioe) {
             ioe.printStackTrace();
         }
