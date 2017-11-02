@@ -30,8 +30,12 @@ public class Application {
             String newFileName = "newFile.zip";
             List<FileFromZip> oldFiles = ZipProcessor.getFilesMetadata(new ZipFile(oldFileName));
             List<FileFromZip> newFiles = ZipProcessor.getFilesMetadata(new ZipFile(newFileName));
-            ZipProcessor.unzip(oldFileName);
-            ZipProcessor.unzip(newFileName);
+            //ZipProcessor.unzip(oldFileName);
+            //ZipProcessor.unzip(newFileName);
+            //System.gc();
+
+            diff.oldFileName = oldFileName;
+            diff.newFileName = newFileName;
 
             diff.oldFileEntitiesCount = oldFiles.size();
             diff.newFileEntitiesCount = newFiles.size();
@@ -48,7 +52,8 @@ public class Application {
             diff.modifiedFilesCont = newFiles.size();
             System.out.println("Modified files: " + newFiles);
             XmlUnitDiffer xmlUnitDiffer = new XmlUnitDiffer();
-            System.out.println(xmlUnitDiffer.processDiffFiles(newFiles, oldFiles).orElse(Collections.emptyList()));
+            diff.nodeBodies = xmlUnitDiffer.processDiffFiles(newFiles, oldFiles).orElse(Collections.emptyList());
+            System.out.println(diff);
         } catch (IOException ioe) {
             ioe.printStackTrace();
         }

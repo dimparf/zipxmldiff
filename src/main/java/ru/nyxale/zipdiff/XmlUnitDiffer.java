@@ -1,13 +1,17 @@
 package ru.nyxale.zipdiff;
 
+import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
+import java.util.Scanner;
 import java.util.stream.Collectors;
 import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Source;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
@@ -16,10 +20,18 @@ import javax.xml.transform.stream.StreamResult;
 
 import org.json.XML;
 import org.w3c.dom.Node;
+import org.xml.sax.InputSource;
 import org.xmlunit.builder.DiffBuilder;
+import org.xmlunit.builder.Input;
+import org.xmlunit.diff.Comparison;
+import org.xmlunit.diff.ComparisonListener;
+import org.xmlunit.diff.ComparisonResult;
+import org.xmlunit.diff.DOMDifferenceEngine;
 import org.xmlunit.diff.DefaultNodeMatcher;
 import org.xmlunit.diff.Diff;
 import org.xmlunit.diff.Difference;
+import org.xmlunit.diff.DifferenceEngine;
+import org.xmlunit.diff.DifferenceEvaluators;
 import org.xmlunit.diff.ElementSelectors;
 import org.xmlunit.xpath.JAXPXPathEngine;
 
@@ -30,12 +42,12 @@ public class XmlUnitDiffer implements Differ {
         XmlReader xmlReader = new XmlReader();
         List<String> diff = new ArrayList<>();
         List<FileFromZip> oldFilesExistInModList = oldFiles
-            .parallelStream()
+            .stream()
             .filter(oldFile -> modifiedFiles
                 .stream()
                 .anyMatch(modifiedFile -> modifiedFile.fileName.equalsIgnoreCase(oldFile.fileName))).collect(Collectors.toList());
 
-        return oldFilesExistInModList.parallelStream().map(oldFile -> {
+        return oldFilesExistInModList.stream().map(oldFile -> {
             try {
                 String oldFileContent = xmlReader.readXmlFile(oldFile);
                 //this is safe .get(0)
@@ -48,7 +60,7 @@ public class XmlUnitDiffer implements Differ {
             } catch (IOException ioe) {
                 return diff;
             }
-        }).findFirst();//.collect(Collectors.toList());
+        }).findFirst();
     }
 
     /**
@@ -60,9 +72,11 @@ public class XmlUnitDiffer implements Differ {
             .compare(oldFileContent)
             .withTest(newFileContent)
             .checkForSimilar()
-            .withNodeMatcher(new DefaultNodeMatcher(ElementSelectors.byNameAndAllAttributes))
+            .withNodeMatcher(new DefaultNodeMatcher(ElementSelectors.byName))
             .build();
-        for (Difference difference : myDiff.getDifferences()) {
+
+        Iterable<Difference> differences = myDiff.getDifferences();
+        for (Difference difference : differences) {
             if (difference.getComparison().getControlDetails().getTarget() != null) {
                 Node testNode = difference.getComparison().getControlDetails().getTarget();
                 String selector = difference.getComparison().getControlDetails().getXPath();
@@ -71,6 +85,17 @@ public class XmlUnitDiffer implements Differ {
                     differentNodesAsJson.add(XML.toJSONObject(nodeToString(node)).toString());
                 }
             }
+            if (difference.getComparison().getTestDetails().getTarget() != null) {
+                Node testNode = difference.getComparison().getTestDetails().getTarget();
+                String selector = difference.getComparison().getTestDetails().getXPath();
+                Iterable<Node> nodes = new JAXPXPathEngine().selectNodes(selector, testNode);
+                for (Node node : nodes) {
+                    differentNodesAsJson.add(XML.toJSONObject(nodeToString(node)).toString());
+                }
+            }
+
+            System.out.println("Difference: " + difference.toString());
+            System.out.println("----------------------------------------------------------");
         }
         return differentNodesAsJson;
     }

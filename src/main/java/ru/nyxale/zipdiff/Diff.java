@@ -1,6 +1,7 @@
 package ru.nyxale.zipdiff;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Статистика по архивам : Кол-во новых новых файлов, удаленных файлов, измененных файлов
@@ -18,12 +19,12 @@ public class Diff {
     public int newNodeCount;
     public int deletedNodeCount;
     public int modifiedNodeCount;
-    public List<FileFromZip> nodeBodies;
+    public List<String> nodeBodies;
 
     public Diff(){}
 
     public Diff(int newFilesCount, int deletedFilesCount, int modifiedFilesCont, String oldFileName, String newFileName,
-                int newNodeCount, int deletedNodeCount, int modifiedNodeCount, List<FileFromZip> nodeBodies) {
+                int newNodeCount, int deletedNodeCount, int modifiedNodeCount, List<String> nodeBodies) {
         this.newFilesCount = newFilesCount;
         this.deletedFilesCount = deletedFilesCount;
         this.modifiedFilesCont = modifiedFilesCont;
