@@ -30,9 +30,9 @@ public class Application {
             String newFileName = "newFile.zip";
             List<FileFromZip> oldFiles = ZipProcessor.getFilesMetadata(new ZipFile(oldFileName));
             List<FileFromZip> newFiles = ZipProcessor.getFilesMetadata(new ZipFile(newFileName));
+            //Uncomment this code for creating test xml files
             //ZipProcessor.unzip(oldFileName);
             //ZipProcessor.unzip(newFileName);
-            //System.gc();
 
             diff.oldFileName = oldFileName;
             diff.newFileName = newFileName;
@@ -53,6 +53,7 @@ public class Application {
             System.out.println("Modified files: " + newFiles);
             XmlUnitDiffer xmlUnitDiffer = new XmlUnitDiffer();
             diff.nodeBodies = xmlUnitDiffer.processDiffFiles(newFiles, oldFiles).orElse(Collections.emptyList());
+            diff.modifiedFilesCont = diff.nodeBodies.size();
             System.out.println(diff);
         } catch (IOException ioe) {
             ioe.printStackTrace();

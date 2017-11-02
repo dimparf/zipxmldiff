@@ -72,7 +72,7 @@ public class XmlUnitDiffer implements Differ {
             .compare(oldFileContent)
             .withTest(newFileContent)
             .checkForSimilar()
-            .withNodeMatcher(new DefaultNodeMatcher(ElementSelectors.byName))
+            .withNodeMatcher(new DefaultNodeMatcher(ElementSelectors.byNameAndText))
             .build();
 
         Iterable<Difference> differences = myDiff.getDifferences();
